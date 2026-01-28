@@ -10,4 +10,5 @@ BOLTZMANN_CONSTANT = scipy.constants.Boltzmann  # J/K
 DIELECTRIC_PERMITTIVITY_VACUUM = scipy.constants.epsilon_0 # F/m
 H = scipy.constants.Planck # J/Hz
 PI = scipy.constants.pi
-SPEED_OF_LIGHT = scipy.constants.speed_of_light # m/s
+# SPEED_OF_LIGHT = scipy.constants.speed_of_light # m/s
+SPEED_OF_LIGHT = 3.0e8  # m/s (approximation)
