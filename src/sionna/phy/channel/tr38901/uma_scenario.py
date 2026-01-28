@@ -237,19 +237,14 @@ class UMaScenario(SystemLevelScenario):
             tf.constant(1.0, self.rdtype),
             tf.constant(0.0, self.rdtype))
 
-        max_value = h_ut- 1.5
-        # Random uniform integer generation is not supported when maxval and
-        # are not scalar. The following commented would therefore not work.
-        # Therefore, for now, we just sample from a continuous
-        # distribution.
-        #delta = tf.cast(tf.math.floor((max_value-min_value)/3.), tf.int32)
-        #s = tf_rng.uniform(shape=[batch_size, num_bs, num_ut],
-        #    minval=0, maxval=delta+1, dtype=tf.int32)
-        #s = tf.cast(s, tf.float32)*3.+min_value
-        s = config.tf_rng.uniform(shape=[batch_size, num_bs, num_ut],
-           minval=12., maxval=max_value, dtype=self.rdtype)
-        # Itc could happen that h_ut = 13m, and therefore max_value < 13m
-        s = tf.where(tf.math.less(s, 12.0),
+        max_value = h_ut - 1.5
+        # Sample from discrete uniform {12, 15, 18, ..., max_valid} per TR 38.901 Table 7.4.1-1 Note 1
+        # Workaround: sample U(0,1) with scalar bounds, then scale to discrete index
+        n_values = tf.maximum(tf.floor((max_value - 12.0) / 3.0) + 1.0, 1.0)
+        u = config.tf_rng.uniform(shape=[batch_size, num_bs, num_ut], minval=0, maxval=1, dtype=self.rdtype)
+        s = 12.0 + 3.0 * tf.floor(u * n_values)
+        # Handle edge case: when h_ut <= 13.5m, max_value <= 12m, only valid value is 12
+        s = tf.where(tf.math.less(max_value, 12.0),
             tf.constant(12.0, self.rdtype), s)
 
         h_e = r + (1.-r)*s
