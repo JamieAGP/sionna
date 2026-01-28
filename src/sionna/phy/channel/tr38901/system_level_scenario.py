@@ -744,11 +744,18 @@ class SystemLevelScenario(Object):
             tf.constant(0.0, self.rdtype))
 
         # Sample the indoor 2D distances for each BS-UT link
-        self._distance_2d_in = config.tf_rng.uniform(
+        u1 = config.tf_rng.uniform(
             shape=[self.batch_size, self.num_bs, self.num_ut],
             minval=self.min_2d_in,
             maxval=self.max_2d_in,
             dtype=self.rdtype) * indoor_mask
+        u2 = config.tf_rng.uniform(
+            shape=[self.batch_size, self.num_bs, self.num_ut],
+            minval=self.min_2d_in,
+            maxval=self.max_2d_in,
+            dtype=self.rdtype) * indoor_mask
+        self._distance_2d_in = tf.minimum(u1, u2)
+        
         # Compute the outdoor 2D distances
         self._distance_2d_out = self.distance_2d - self._distance_2d_in
         # Compute the indoor 3D distances
